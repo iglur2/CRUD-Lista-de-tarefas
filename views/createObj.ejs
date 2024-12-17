@@ -1,0 +1,108 @@
+<%- include('partials/header.ejs') %>
+
+    <%- include('partials/navbar.ejs') %>
+
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col md-6">
+                    <div class="card-header text-center text-white" style="background-color: #343a40;">
+                        <h2>Criar Objetivo</h2>
+                    </div>
+                    <div class="card-body p-4">
+                        <form action="/create" method="post">
+                            <div class="mb-3">
+                                <label for="" class="form-label">Titulo</label>
+                                <input type="text" name="objective" placeholder="Título do Objetivo" required class="form-control"/>
+                            </div>
+                            <div class="mb-3">
+                                <label for="" class="form-label">Descrição</label>
+                                <input type="text" name="descObj" placeholder="Descrição do Objetivo" class="form-control"/>
+                            </div>
+                            <div class="mb-3">
+                                <label for="" class="form-label">Tarefas:</label>
+                                <a href="#" class="btn btn-dark addTask">Adicionar</a>
+                                <div id="taskContainer" class="mt-3"></div>
+                            </div>
+                            <div class="d-grid">
+                                <button class="btn btn-dark btn-block" type="submit">Criar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <%- include('partials/footer.ejs') %>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        const form = document.querySelector("form");
+                        const taskContainer = document.getElementById("taskContainer");
+                        const addTaskButton = document.querySelector(".addTask");
+                        let taskCount = 0;
+                        const maxTasks = 10;
+
+                        // Impede que o formulário seja enviado ao clicar em "Adicionar"
+                        form.addEventListener("submit", function (event) {
+                            console.log("Formulário enviado com sucesso.");
+                            // Caso necessário, remova o console.log após os testes
+                        });
+
+                        // Função para criar um novo campo de tarefa
+                        function createTaskInput() {
+                            if (taskCount >= maxTasks) return; // Não permite criar mais de 10 inputs
+                            taskCount++;
+
+                            const taskDiv = document.createElement("div");
+                            taskDiv.classList.add("input-group", "mb-3");
+
+                            // Input para a tarefa
+                            const taskInput = document.createElement("input");
+                            taskInput.type = "text";
+                            taskInput.name = "tasks"; // Nome correto para enviar como array
+                            taskInput.classList.add("form-control");
+                            taskInput.placeholder = `Tarefa ${taskCount}`;
+
+                            // Botão para remover o input
+                            const removeButton = document.createElement("button");
+                            removeButton.type = "button";
+                            removeButton.classList.add("btn", "btn-danger");
+                            removeButton.textContent = "Remover";
+                            removeButton.addEventListener("click", function () {
+                                removeTaskInput(taskDiv);
+                            });
+
+                            // Adicionar o input e o botão ao contêiner da tarefa
+                            taskDiv.appendChild(taskInput);
+                            taskDiv.appendChild(removeButton);
+                            taskContainer.appendChild(taskDiv);
+
+                            checkAddButtonState();
+                        }
+
+                        // Função para remover um campo de tarefa
+                        function removeTaskInput(taskDiv) {
+                            taskContainer.removeChild(taskDiv);
+                            taskCount--;
+                            checkAddButtonState();
+                        }
+
+                        // Verifica se o botão "Adicionar" deve aparecer ou desaparecer
+                        function checkAddButtonState() {
+                            if (taskCount >= maxTasks) {
+                                addTaskButton.style.display = "none";
+                            } else {
+                                addTaskButton.style.display = "inline-block";
+                            }
+                        }
+
+                        // Evento de clique no botão "Adicionar"
+                        addTaskButton.addEventListener("click", function (event) {
+                            event.preventDefault(); // Impede a navegação ou envio do formulário
+                            createTaskInput();
+                        });
+                    });
+
+                </script>
+
+                </body>
+
+                </html>

@@ -1,0 +1,149 @@
+<%- include('partials/header.ejs') %>
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .sidebar {
+        background-color: #343a40;
+        color: #fff;
+        min-height: 100vh;
+        padding: 20px 15px;
+    }
+
+    .sidebar h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid #495057;
+        padding-bottom: 10px;
+    }
+
+    .sidebar a {
+        color: #adb5bd;
+        display: block;
+        text-decoration: none;
+        padding: 10px 15px;
+        margin-bottom: 5px;
+        border-radius: 4px;
+        font-weight: bold;
+    }
+
+    .sidebar a:hover, .sidebar a.active {
+        background-color: #495057;
+        color: #fff;
+    }
+
+    .content {
+        padding: 20px;
+        width: 100%;
+    }
+
+    .card-header {
+        background-color: #495057;
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .sidebar {
+            min-height: auto;
+        }
+
+        .sidebar a {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<div class="d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Objetivos</h2>
+        <% objetivos.forEach(obj => { %>
+            <a href="#" class="objective-link" data-id="<%= obj.id %>"><%= obj.titulo %></a>
+        <% }) %>
+        <a href="/create" class="btn btn-light" style="color: black;">Adicionar</a>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div class="content w-100">
+        <div id="task-container">
+            <h2 class="text-secondary">Selecione um objetivo</h2>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const links = document.querySelectorAll(".objective-link");
+        const taskContainer = document.getElementById("task-container");
+
+        // Dados das tarefas enviados pelo backend
+        const tarefas = <%- JSON.stringify(tarefas) %>;
+
+        // Clique no menu de objetivos
+        links.forEach(link => {
+            link.addEventListener("click", (e) => {
+                e.preventDefault();
+                const objetivoId = parseInt(e.target.dataset.id);
+
+                // Filtrar tarefas associadas ao objetivo
+                const objetivoTarefas = tarefas.filter(tarefa => tarefa.objetivoId === objetivoId);
+
+                // Renderizar as tarefas no container
+                renderTasks(objetivoTarefas, e.target.textContent);
+            });
+        });
+
+        // Função para renderizar as tarefas
+        function renderTasks(tarefas, titulo) {
+            let tableRows = tarefas.map(tarefa => `
+                <tr>
+                    <td class="align-middle">${tarefa.titulo}</td>
+                    <td class="align-middle text-center ${tarefa.status ? 'table-success' : 'table-danger'}">
+                        ${tarefa.status ? 'Completa' : 'Incompleta'}
+                    </td>
+                    <td class="align-middle text-center">
+                        <div class="btn-group">
+                            <a class="btn btn-${tarefa.status ? 'danger' : 'success'} btn-sm me-2" 
+                               href="/complete/${tarefa.id}">
+                                ${tarefa.status ? 'Incompleta' : 'Completa'}
+                            </a>
+                            <a class="btn btn-danger btn-sm" href="/delete/task/${tarefa.id}">Excluir</a>
+                        </div>
+                    </td>
+                </tr>
+            `).join("");
+
+            taskContainer.innerHTML = `
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">${titulo}</h4>
+                        <div>
+                        <a href="/add/${tarefas[0]?.objetivoId}" class="btn btn-dark">Adicionar Tarefa</a>
+                        <a href="/delete/objective/${tarefas[0]?.objetivoId}" class="btn btn-danger">Excluir</a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-wrapper">
+                            <table class="table table-hover table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="w-75">Tarefa</th>
+                                        <th class="w-15 text-center">Status</th>
+                                        <th class="w-10 text-center">Opções</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRows || '<tr><td colspan="3" class="text-center">Nenhuma tarefa encontrada</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    });
+</script>
+
+<%- include('partials/footer.ejs') %>
